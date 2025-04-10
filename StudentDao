@@ -1,0 +1,181 @@
+package com.infobeans.dao;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.infobeans.model.*;
+
+public class StudentDao {
+
+	
+
+	private static final String Url = "jdbc:mysql://localhost:3306/OnlineCourseEnrollmentSystem?useSSL=false&allowPublicKeyRetrieval=true";
+	private static final String password = "root";
+
+	private static final String user = "root";
+		
+		 private Connection getConnection () throws SQLException
+		{
+			return DriverManager.getConnection(Url, user, password);
+			
+		}
+	// Add New Student
+		 public void  insertStudent(Student student) throws SQLException
+		 {
+			 String sql = "insert into Student(name, email, contact_number ,  registrationdate ) values (?,?,?,?)";
+			 try ( Connection con = getConnection())
+			 {
+				 PreparedStatement pst = con.prepareStatement(sql);
+				 pst.setString(1,student.getName());
+				 pst.setString(2, student.getEmail());
+				 pst.setString(3, student.getContactno());
+				 pst.setString(4, student.getRegistrarionDate());
+				 
+				 int rowaffected = pst.executeUpdate ();
+				 if ( rowaffected > 0)
+				 {
+					 System.out.println ( "Data inserted successfully");
+				 }
+				 else
+				 {
+					 System.out.println ( " data doesnot inserted successfully");
+				 }
+			 }
+		 }
+		 
+		 // view all student
+		 
+		 public List <Student>getAllstudents() throws SQLException
+		 {
+			 String sql = "select * from student";
+			 List <Student> students = new ArrayList<>();
+			 try (Connection conn = getConnection())
+			 {
+				 Statement st = conn.createStatement();
+				 ResultSet rs = st.executeQuery(sql);
+				 while (rs.next ())
+				 {   int id = rs.getInt("student_id");
+						String name = rs.getString("name");
+                        String  email = rs.getString("email");
+                        String contactno = rs.getString("contact_number");
+                        String registerdate= rs.getString("registrationdate");
+                        Student student = new Student ( id,name , email, contactno, registerdate);
+                        students.add (student);
+				 }
+			 }
+			return students;
+			 
+		 }
+		 // get student by id
+		 public Student getStudentById (int id ) throws SQLException, Exception
+		 {
+			 String sql = "Select * from  Student where  student_id =?";
+			 try(Connection con3 = getConnection ())
+			 {PreparedStatement pst1 = con3.prepareStatement(sql);
+			 pst1.setInt(1, id);
+			 ResultSet rs = pst1.executeQuery();
+			 
+			 if (rs.next())
+			 { return new Student(
+		                rs.getInt("student_id"),
+		                rs.getString("name"),
+		                rs.getString("email"),
+		                rs.getString("contact_number"),
+		                rs.getString("registrationdate")
+		            );
+			 }
+
+				 
+			 }
+			return null;
+			 
+		 }
+		 // update student details
+		 public boolean updateStudent(Student student) throws SQLException
+		 {
+			 String sql = "Update Student set name = ? , email = ?, contact_number=? where student_id = ?";
+			 try ( Connection con4 = getConnection())
+			 {
+				 PreparedStatement pst = con4.prepareStatement(sql);
+				 pst.setString(1, student.getName());
+				 pst.setString (2, student.getEmail());
+				 pst.setString(3, student.getContactno());
+				 pst.setInt(4,student.getStudentId());
+				 int rowsAffected = pst.executeUpdate();
+				 if (rowsAffected > 0) {
+			            System.out.println("✅ Student updated successfully!");
+			        } else {
+			            System.out.println("❌ No student found with ID: " + student.getStudentId());
+			        }
+			 }
+			return false;
+		 }
+		 public void deleteStudent(int studentid) throws Exception
+		 {
+			 Student existingStudent = getStudentById(studentid);
+			    if (existingStudent == null) {
+			        System.out.println("❌ No student found with ID: " + studentid);
+			        return;
+			    }
+			 String sql = "Delete  from Student where student_id =?";
+			 try(Connection con5 = getConnection())
+			 {
+				PreparedStatement pst = con5.prepareStatement(sql);
+					pst.setInt(1, studentid);	
+		int rowaffected=			pst.executeUpdate();
+		if (rowaffected>0)
+		{
+			System.out.println (studentid + "  deleted successfully");
+		}
+		else
+		{
+			System.out.println (studentid + " student id s not found");
+	
+		}
+					
+			 }
+		 }
+		 
+		 // total count
+		 public int getTotalStudentCount() throws SQLException {
+			    String sql = "SELECT COUNT(*) AS total_students FROM Student";
+			    try (Connection con = getConnection();
+			    		Statement st = con.createStatement();
+			    		ResultSet rs = st.executeQuery(sql)) {
+			        if (rs.next()) {
+			            return rs.getInt("total_students");
+			        }
+			    }
+			    return 0;
+			}
+		 // search by name
+		 public List<Student> searchStudentByName(String name) throws SQLException {
+		        String sql = "SELECT * FROM Student WHERE name LIKE ?";
+		        List<Student> students = new ArrayList<>();
+		        try (Connection conn = getConnection();
+		             PreparedStatement pst = conn.prepareStatement(sql)) {
+		            pst.setString(1, "%" + name + "%"); // Use LIKE for partial matches
+		            ResultSet rs = pst.executeQuery();
+		            while (rs.next()) {
+		                int id = rs.getInt("student_id");
+		                String studentName = rs.getString("name");
+		                String email = rs.getString("email");
+		                String contactno = rs.getString("contact_number");
+		                String registerdate = rs.getString("registrationdate");
+		                Student student = new Student(id, studentName, email, contactno, registerdate);
+		                students.add(student);
+		            }
+		        }
+		        return students;
+		    }
+
+
+		 
+	}
+
