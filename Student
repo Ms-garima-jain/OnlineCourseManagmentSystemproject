@@ -1,0 +1,62 @@
+package com.infobeans.model;
+
+import java.util.Date;
+
+public class Student {
+
+	 private int student_id ;
+	 private String name ;
+	 private String email;
+	 private String contact_no;
+	 private String registration_date;
+	
+	 public Student (int student_id , String name , String email, String contact_no,String registation_date)
+	 {
+		 this.student_id= student_id;
+		 this.name = name;
+		 this.email= email;
+		 this.contact_no= contact_no;
+		 this.registration_date= registation_date;
+		 
+	 }
+	  public int getStudentId ()
+	  {
+		  return student_id;
+	  }
+	  public void setStudentId (int student_id)
+	  {
+		  this.student_id= student_id;		  
+	  }
+	  public String getName ()
+	  {
+		  return name;
+	  }
+	  public void setName (String name )
+	  {
+		  this.name = name ;
+	  }
+	  public String getEmail ()
+	  {
+		  return email;
+	  }
+	  public void setEmail (String email)
+	  {
+		  this.email = email;
+	  }
+	  public String getContactno () {
+		  return contact_no;
+	  }
+	  public void setContactno (String contact_no)
+	  {
+		  this.contact_no= contact_no;
+	  }
+	  public String getRegistrarionDate () {
+		  return registration_date;
+	  }
+	  public void setRegistrationDate (String registration_date )
+	  {
+		 this.registration_date=registration_date;
+	  }
+	  
+	  
+}
