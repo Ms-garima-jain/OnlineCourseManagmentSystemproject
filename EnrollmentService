@@ -1,0 +1,56 @@
+package com.infobeans.Service;
+
+import java.io.FileOutputStream;
+import java.io.IOException; // Import IOException
+import java.sql.SQLException;
+import java.util.List;
+
+import com.infobeans.dao.Enrollmentdao;
+import com.infobeans.model.Enrollment;
+public class EnrollmentService {
+
+    private Enrollmentdao enrollmentDao;
+
+    public EnrollmentService() {
+        this.enrollmentDao = new Enrollmentdao();
+    }
+
+    public void enrollStudent(int studentId, int courseId, String enrollmentDate) throws SQLException {
+        Enrollment enrollment = new Enrollment(0, studentId, courseId, enrollmentDate);
+        enrollmentDao.enrollStudent(enrollment);
+    }
+// list all enrollments;
+    public List<Enrollment> getAllEnrollments() throws SQLException {
+        return enrollmentDao.getAllEnrollments();
+    }
+    // csv report
+    public List<Enrollment>  printCsvReportToConsole() throws SQLException {
+        List<Enrollment> enrollments = getAllEnrollments();
+
+        System.out.println("Enrollment Report");
+        System.out.println("------------------------------------------------------------------");
+        System.out.printf("%-15s %-15s %-15s %-15s\n", "Enrollment ID", "Student ID", "Course ID", "Enrollment Date");
+        System.out.println("------------------------------------------------------------------");
+
+        for (Enrollment e : enrollments) {
+            System.out.printf("%-15d %-15d %-15d %-15s\n", e.getEnrollmentId(), e.getStudentId(), e.getCourseId(), e.getEnrollmentDate());
+        }
+
+        System.out.println("------------------------------------------------------------------");
+		return enrollments;
+    }
+    // unroll
+    public void unenrollStudent(int studentId, int courseId) throws SQLException {
+        try {
+            enrollmentDao.unenrollStudent(studentId, courseId);
+            System.out.println("Student " + studentId + " unenrolled from course " + courseId + " successfully.");
+        } catch (SQLException e) {
+            System.err.println("Error unenrolling student from course: " + e.getMessage());
+            throw e; 
+        }
+    }
+    // update enrollmentdate
+    public void updateEnrollmentDate(int studentId, int courseId, String newEnrollmentDate) throws SQLException {
+        enrollmentDao.updateEnrollmentDate(studentId, courseId, newEnrollmentDate);
+    }
+}
