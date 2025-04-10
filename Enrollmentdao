@@ -1,0 +1,130 @@
+package com.infobeans.dao;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.infobeans.model.Enrollment;
+
+public class Enrollmentdao {
+	 private static final String Url = "jdbc:mysql://localhost:3306/OnlineCourseEnrollmentSystem?useSSL=false&serverTimezone=UTC";
+	    private static final String password = "root";
+	    private static final String user = "root";
+
+	    private Connection getConnection() throws SQLException {
+	        return DriverManager.getConnection(Url, user, password);
+	    }
+
+	    
+//	    -------------new updated  add enroll------------------
+	    public void enrollStudent(Enrollment enrollment) throws SQLException {
+	        int studentId = enrollment.getStudentId();
+	        int courseId = enrollment.getCourseId();
+	        String enrollmentDate = enrollment.getEnrollmentDate();
+
+	        // Check if student exists
+	        if (!doesStudentExist(studentId)) {
+	            System.out.println("❌ Student ID does not exist.");
+	            return;
+	        }
+
+	        // Check if course exists
+	        if (!doesCourseExist(courseId)) {
+	            System.out.println("❌ Course ID does not exist.");
+	            return;
+	        }
+
+	        // Proceed to enroll if both exist
+	        String sql = "INSERT INTO Enrollment (student_id, course_id, enrollment_date) VALUES (?, ?, ?)";
+	        try (Connection con = getConnection();
+	             PreparedStatement pst = con.prepareStatement(sql)) {
+
+	            pst.setInt(1, studentId);
+	            pst.setInt(2, courseId);
+	            pst.setString(3, enrollmentDate);
+
+	            int rowAffected = pst.executeUpdate();
+	            if (rowAffected > 0) {
+	                System.out.println("✅ Enrollment done successfully.");
+	            } else {
+	                System.out.println("❌ Enrollment not done successfully.");
+	            }
+	        }
+	    }
+	    private boolean doesStudentExist(int studentId) throws SQLException {
+	        String query = "SELECT 1 FROM student WHERE student_id = ?";
+	        try (Connection con = getConnection();
+	             PreparedStatement pst = con.prepareStatement(query)) {
+	            pst.setInt(1, studentId);
+	            ResultSet rs = pst.executeQuery();
+	            return rs.next();
+	        }
+	    }
+
+	    private boolean doesCourseExist(int courseId) throws SQLException {
+	        String query = "SELECT 1 FROM course WHERE course_id = ?";
+	        try (Connection con = getConnection();
+	             PreparedStatement pst = con.prepareStatement(query)) {
+	            pst.setInt(1, courseId);
+	            ResultSet rs = pst.executeQuery();
+	            return rs.next();
+	        }
+	    }
+
+	    
+	    // read all list
+	    public List<Enrollment> getAllEnrollments() throws SQLException {
+	        List<Enrollment> enrollments = new ArrayList<>();
+	        String sql = "SELECT * FROM Enrollment";
+	        try (Connection con = getConnection();
+	             PreparedStatement pst = con.prepareStatement(sql);
+	             ResultSet rs = pst.executeQuery()) {
+	            while (rs.next()) {
+	                Enrollment enrollment = new Enrollment(
+	                        rs.getInt("enrollment_id"),
+	                        rs.getInt("student_id"),
+	                        rs.getInt("course_id"),
+	                        rs.getString("enrollment_date")
+	                );
+	                enrollments.add(enrollment);
+	            }
+	        }
+	        return enrollments;
+	    }
+	    // unroll student
+	    public void unenrollStudent(int studentId, int courseId) throws SQLException {
+	        String sql = "DELETE FROM Enrollment WHERE student_id = ? AND course_id = ?";
+	        try (Connection con = getConnection();
+	             PreparedStatement pst = con.prepareStatement(sql)) {
+	            pst.setInt(1, studentId);
+	            pst.setInt(2, courseId);
+	            int rowsAffected = pst.executeUpdate();
+	            if (rowsAffected == 0) {
+	                System.out.println("No enrollment found for student " + studentId + " in course " + courseId + ".");
+	            }
+	        }
+	    }
+	    // update Enrollmentdate
+	    public void updateEnrollmentDate(int studentId, int courseId, String newEnrollmentDate) throws SQLException {
+	        String sql = "UPDATE Enrollment SET enrollment_date = ? WHERE student_id = ? AND course_id = ?";
+	        try (Connection con = getConnection();
+	             PreparedStatement pst = con.prepareStatement(sql)) {
+	            pst.setString(1, newEnrollmentDate);
+	            pst.setInt(2, studentId);
+	            pst.setInt(3, courseId);
+	        int rowaffected=    pst.executeUpdate();
+	        if (rowaffected>0)
+	        {
+	        	System.out.println ( "New Date Updated Successfully");
+	        }
+	        else
+	        {
+	        	System.out.println ( " Not updated Successfully");
+	        }
+	        }
+	    }
+}
