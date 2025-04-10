@@ -1,0 +1,125 @@
+package com.infobeans.Service;
+
+import java.sql.SQLException;
+import java.util.List;
+import com.infobeans.dao.CourseDao;
+import com.infobeans.model.Course;
+
+public class CourseService {
+    private CourseDao courseDao;
+
+    public CourseService() {
+        this.courseDao = new CourseDao();
+    }
+
+    // ✅ Add Course Service
+    public boolean addCourse(String courseName, double duration, double fees) {
+
+        if (courseName == null || courseName.isEmpty() || !courseName.matches("^[a-zA-Z\\s]+$")) {
+            System.out.println("❌ Invalid course name. Only alphabets and spaces are allowed.");
+            return false;
+        }
+     
+
+
+        if (!isValidDuration(duration)) {
+            System.out.println("❌ Invalid duration. Duration must be a positive integer greater than 0.");
+            return false;
+        }
+
+        if (!isValidFees(fees)) {
+            System.out.println("❌ Invalid fees. Fees must be a positive value and can be an integer or a decimal.");
+            return false;
+        }
+
+        try {
+            Course course = new Course(0, courseName, (int) duration, fees);
+            courseDao.addCourse(course);
+            System.out.println("✅ Course added successfully!");
+            return true;
+        } catch (SQLException e) {
+            System.out.println("❌ Database error occurred while adding course.");
+            e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            System.out.println("❌ Unexpected error occurred.");
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ✅ Validate duration (only positive integers)
+    private boolean isValidDuration(double duration) {
+        return (duration > 0 && duration == (int) duration);
+    }
+
+    // ✅ Validate fees (must be positive and allow integers & decimals)
+    private boolean isValidFees(double fees) {
+        return (fees > 0);
+    }
+
+    // ✅ Get all courses
+    public List<Course> getAllCourses() {
+        try {
+            return courseDao.getAllCourses();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // ✅ Fetch course by ID and display details
+    public void fetchCourseById(int id) {
+        try {
+            Course course = courseDao.getCourseById(id);
+            if (course != null) {
+                System.out.println("\n=============================================");
+                System.out.println("           📚 Course Details for ID: " + id);
+                System.out.println("=============================================");
+                System.out.printf("| %-5s | %-20s | %-12s | %-12s |\n", 
+                                  "ID", "Course Name", "Duration", "Fees");
+                System.out.println("=============================================");
+                System.out.printf("| %-5d | %-20s | %-12d | %-12.2f |\n", 
+                                  course.getCourse_id(), 
+                                  course.getCourseName(), 
+                                  course.getDuration(), 
+                                  course.getFees());
+                System.out.println("=============================================");
+            } else {
+                System.out.println("❌ Course not found for ID: " + id);
+            }
+        } catch (SQLException e) {
+            System.out.println("❌ Database error while fetching course details.");
+            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println("❌ Unexpected error occurred.");
+            e.printStackTrace();
+        }
+    }
+    // delete course 
+ public void deleteCourse(int courseId) throws SQLException
+ {
+	
+		courseDao.deleteCourse(courseId);
+	 
+	
+ }
+ // update course
+ public void updateCourseField(int courseId, int fieldChoice, String newValue) throws SQLException {
+     courseDao.updateCourseField(courseId, fieldChoice, newValue);
+ }
+
+ public void updateAllCourseDetails(String courseName, int duration, double fees, int courseId) {
+     try {
+         courseDao.updateAllCourseDetails(courseName, duration, fees, courseId);
+     } 
+     catch (SQLException e) {
+         System.out.println("❌ Error while updating course: " + e.getMessage());
+     }
+ }
+
+ private boolean isValidField(String fieldName) {
+     return fieldName.equals("course_name") || fieldName.equals("duration") || fieldName.equals("fees");
+ }
+}
+
