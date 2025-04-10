@@ -1,0 +1,194 @@
+package com.infobeans.Service;
+
+import com.infobeans.dao.StudentDao;
+import com.infobeans.model.Student;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Scanner;
+
+
+public class StudentService {
+	private StudentDao studentdao;
+	public StudentService () {
+		this.studentdao= new StudentDao();
+				
+	}
+	public boolean addStudent(String name , String email, String contactNumber, String registration_date)
+	{
+		if (!name.matches("^[a-zA-Z\\s]+$")) 
+		{
+		    System.out.println("Invalid name. Name should contain only letters and spaces.");
+		    return false;
+		}
+		if (contactNumber == null) {
+	        System.out.println("Contact number cannot be null.");
+	        return false;
+	    } else if (!contactNumber.matches("^\\d{10}$")) {
+	        if (contactNumber.length() > 10) {
+	            System.out.println("Invalid contact number. Contact number exceeds 10 digits.");
+	        } else if (contactNumber.length() < 10) {
+	            System.out.println("Invalid contact number. Contact number is less than 10 digits.");
+	        } else{
+	            System.out.println("Invalid contact number. Contact number should contain only digits.");
+	        }
+	        return false;
+	    }
+
+		
+		if ( !(email instanceof String ) || !(contactNumber instanceof String) || !(registration_date instanceof String))   
+		{
+			System.out.println ( " Invalid data type . Expected String values ");
+		return false;
+		
+	   }
+		 if (name == null || name.isEmpty()) {
+		        System.out.println("Name cannot be null or empty.");
+		        return false;
+		    }
+
+		    if (email == null || !email.contains("@")) {
+		        System.out.println("Invalid email format. Email must contain '@' symbol.");
+		        return false;
+		    }
+		try {
+			Student student = new Student (0 , name , email, contactNumber,registration_date);
+
+			studentdao.insertStudent(student);
+		}
+		catch (Exception e)
+		{
+			 e.printStackTrace();
+		        return false;	
+		}
+		return false;
+	}
+	public List <Student>fetchAllStudents() throws SQLException
+	{
+		return studentdao.getAllstudents();
+		
+	}
+	public void FetchId(int id) throws SQLException, Exception 
+	{
+	    Student student = studentdao.getStudentById(id);
+	    if (student != null) 
+	    {
+	        System.out.println("\n=============================================");
+	        System.out.println("           Student Details for ID: " + id);
+	        System.out.println("=============================================");
+	        System.out.printf("| %-5s | %-12s | %-20s | %-12s | %-12s |\n", 
+	                          "ID", "Name", "Email", "Contact No", "Reg. Date");
+	        System.out.println("=============================================");
+	        System.out.printf("| %-5d | %-12s | %-20s | %-12s | %-12s |\n", 
+	                          student.getStudentId(),
+	                          student.getName(), 
+	                          student.getEmail(), 
+	                          student.getContactno(), 
+	                          student.getRegistrarionDate());
+	        System.out.println("=============================================");
+	    } 
+	    else 
+	    {
+	        System.out.println("❌ Student not found for ID: " + id);
+	    }
+	}
+	///re updated code
+	public void updateStudentDynamic(int studentid, Scanner scn) throws SQLException, Exception {
+	    Student student = studentdao.getStudentById(studentid);
+
+	    if (student == null) {
+	        System.out.println("❌ Student not found for ID: " + studentid);
+	        return;
+	    }
+
+	    int choice;
+	    while (true) {
+	        System.out.println("\nWhich field do you want to update?");
+	        System.out.println("1. Name");
+	        System.out.println("2. Email");
+	        System.out.println("3. Contact Number");
+	        System.out.println("4. Update All");
+	        System.out.print("Enter your choice: ");
+
+	        if (scn.hasNextInt()) {
+	            choice = scn.nextInt();
+	            scn.nextLine(); // clear the newline after int input
+	            break;
+	        } else {
+	            System.out.println("❌ Invalid input! Please enter a number between 1-4.");
+	            scn.next(); // clear invalid input
+	        }
+	    }
+
+	    switch (choice) {
+	        case 1:
+	            System.out.print("Enter new name: ");
+	            student.setName(scn.nextLine());
+	            break;
+	        case 2:
+	            System.out.print("Enter new email: ");
+	            student.setEmail(scn.nextLine());
+	            break;
+	        case 3:
+	            System.out.print("Enter new contact number: ");
+	            student.setContactno(scn.nextLine());
+	            break;
+	        case 4:
+	            System.out.print("Enter new name: ");
+	            student.setName(scn.nextLine());
+	            System.out.print("Enter new email: ");
+	            student.setEmail(scn.nextLine());
+	            System.out.print("Enter new contact number: ");
+	            student.setContactno(scn.nextLine());
+	            break;
+	        default:
+	            System.out.println("❌ Invalid choice! No updates performed.");
+	            return;
+	    }
+
+	    studentdao.updateStudent(student);
+	    System.out.println("✅ Student updated successfully!");
+	}
+
+	// delete student
+	public  void  deleteStudent ( int studentid, Scanner scn) throws Exception
+	{
+		try
+		{
+	        System.out.print("⚠️ Are you sure you want to delete student with ID " + studentid + "? (yes/no): ");
+	        Scanner Scn = new Scanner (System.in);
+	        scn.nextLine();
+	        String confirmation = scn.nextLine().toLowerCase();
+	      
+	        if (!confirmation.equals("yes")) {
+	            System.out.println("❌ Deletion cancelled.");
+	            return;
+	        }
+	      studentdao.deleteStudent(studentid);
+	        
+	        
+		}
+		catch(SQLException e)
+		{
+	e.printStackTrace();
+	System.out.println("❌ Error occurred while deleting student.");
+
+		}
+
+	}
+	
+	public int getTotalStudentCount() throws SQLException {
+	    return studentdao.getTotalStudentCount();
+	}
+	// search by name 
+	 public List<Student> searchStudentByName(String name) throws SQLException {
+	        return studentdao.searchStudentByName(name);
+	    }
+
+
+	
+
+}
